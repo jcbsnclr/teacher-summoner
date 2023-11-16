@@ -9,37 +9,54 @@ body {
     display: -webkit-flex;
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     /* max-height: 97.5%; */
+    min-height: 32ex;
 
-    margin-top: 2.5%;
-    margin-bottom: 2.5%;
+    margin: 3em;
 }
 
 .sidebar {
     /* -webkit-flex: 1; */
     flex: 1;
-
-    margin-left: 20%;
-
-
-
-    margin-right: 1%;
-
-    border: 1px dashed black;
-
-    padding: 0.1%;
+    display: flex;
+    flex-direction: column;
+    margin-right: 1em;
+    max-width: 40em;
+    padding: 1em;
 }
 
 .content {
-    padding: 0.1%;
+    padding: 1em;
     -webkit-flex: 5;
-    flex: 5;
-
-    margin-right: 20%;
-
-    border: 1px dashed black;
+    /*flex: 5;*/
+    max-width: 100em;
 }
 
-body {
-
+:root {
+    --global-font-size: 15px;
+    --global-line-height: 1.4em;
+    --global-space: 10px;
+    --font-stack: Menlo, Monaco, Lucida Console, Liberation Mono,
+      DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace,
+      serif;
+    --mono-font-stack: Menlo, Monaco, Lucida Console, Liberation Mono,
+      DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace,
+      serif;
+    --background-color: #222225;
+    --page-width: 60em;
+    --font-color: #e8e9ed;
+    --invert-font-color: #222225;
+    --secondary-color: #a3abba;
+    --tertiary-color: #a3abba;
+    --primary-color: #62c4ff;
+    --error-color: #ff3c74;
+    --progress-bar-background: #3f3f44;
+    --progress-bar-fill: #62c4ff;
+    --code-bg-color: #3f3f44;
+    --input-style: solid;
+    --display-h1-decoration: none;
 }
+
+
+

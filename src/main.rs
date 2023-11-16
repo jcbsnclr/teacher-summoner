@@ -1,12 +1,12 @@
 mod ticket;
-mod template;
+mod ui;
 
-use std::net::{ToSocketAddrs, SocketAddr};
+use std::net::SocketAddr;
 
+use axum::routing::get;
 use axum::Router;
-use axum::response::Html;
-use axum::routing::{get, post};
-use axum::Json;
+
+use tower_livereload::LiveReloadLayer;
 
 use maud::{Markup, Render};
 
@@ -15,9 +15,10 @@ async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
     let app = Router::new()
-        .route("/", get(root));
+        .route("/", get(root))
+        .layer(LiveReloadLayer::new());
 
-    let addr = SocketAddr::from(([127,0,0,1], 1234));
+    let addr = SocketAddr::from(([127, 0, 0, 1], 1234));
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await?;
@@ -26,8 +27,5 @@ async fn main() -> anyhow::Result<()> {
 }
 
 async fn root() -> Markup {
-    template::Base {
-        title: "Hello, World!".to_string(),
-        body: "foo"
-    }.render()
+    ui::base("Tickets", "Hello, World!")
 }
