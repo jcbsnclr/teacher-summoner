@@ -27,5 +27,13 @@ async fn main() -> anyhow::Result<()> {
 }
 
 async fn root() -> Markup {
-    ui::base("Tickets", "Hello, World!")
+    let mut list = ticket::TicketList::new();
+
+    list.add_ticket("Jane Doe".into(), Some("Nothing works".into()));
+    let idx = list.add_ticket("John Doe".into(), Some("everything is broken".into()));
+    list.add_ticket("Jane Doe".into(), None);
+
+    list.dismiss(idx);
+
+    ui::base("Tickets", &list)
 }

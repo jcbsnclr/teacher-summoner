@@ -2,9 +2,6 @@ html, body {
     margin: 0;
 }
 
-body {
-}
-
 .flex-container {
     display: -webkit-flex;
     display: flex;
@@ -31,6 +28,25 @@ body {
     -webkit-flex: 5;
     /*flex: 5;*/
     max-width: 100em;
+}
+
+.help-card {
+    margin: 1em;
+    max-width: 60em;
+    display: flex;
+    flex-direction: column;
+}
+
+.help-card-text {
+    display: flex;
+    padding: 1em;
+    flex-direction: column;
+}
+
+.help-card-btn {
+    max-width: 5em;
+    margin: 1em;
+    align-self: flex-end;
 }
 
 :root {
