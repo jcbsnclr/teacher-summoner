@@ -2,8 +2,6 @@ use maud::{Render, DOCTYPE};
 
 use crate::ticket::Ticket;
 
-const STYLESHEET: &'static str = include_str!("style.css");
-
 pub fn base(title: &str, body: impl Render) -> maud::Markup {
     maud::html! {
         (DOCTYPE)
@@ -11,8 +9,8 @@ pub fn base(title: &str, body: impl Render) -> maud::Markup {
         head {
             meta charset="utf-8" {}
             title { (title) " - WIP" }
-            link rel="stylesheet" href="https://unpkg.com/terminal.css@0.7.2/dist/terminal.min.css" {}
-            style { (STYLESHEET) }
+            link rel="stylesheet" href="/static/terminal.min.css" {}
+            link rel="stylesheet" href="/static/style.css" {}
         }
 
         body class="terminal" {

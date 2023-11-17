@@ -30,9 +30,13 @@ html, body {
     max-width: 100em;
 }
 
+.student-form {
+    max-width: 60em;
+}
+
 .help-card {
     margin: 1em;
-    max-width: 60em;
+    max-width: 55em;
     display: flex;
     flex-direction: column;
 }
@@ -50,7 +54,7 @@ html, body {
 }
 
 :root {
-    --global-font-size: 15px;
+    --global-font-size: 18px;
     --global-line-height: 1.4em;
     --global-space: 10px;
     --font-stack: Menlo, Monaco, Lucida Console, Liberation Mono,

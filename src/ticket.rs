@@ -18,7 +18,14 @@ impl TicketList {
         }
     }
 
-    pub fn add_ticket(&mut self, student: String, desc: Option<String>) -> TicketId {
+    pub fn add_ticket(
+        &mut self,
+        student: impl AsRef<str>,
+        desc: Option<impl AsRef<str>>,
+    ) -> TicketId {
+        let student = student.as_ref().to_string();
+        let desc = desc.map(|d| d.as_ref().to_string());
+
         let id = TicketId(self.tickets.len());
 
         self.tickets.push(Ticket { id, student, desc });
@@ -38,10 +45,16 @@ impl Render for TicketList {
             .iter()
             .filter(|t| !self.dismissed.contains(&t.id));
 
+        let is_empty = self.tickets.len() == self.dismissed.len();
+
         maud::html! {
-            div class="terminal-timeline" {
-                @for ticket in tickets {
-                    (ticket)
+            @if is_empty {
+                i { "No tickets open" }
+            } @ else {
+                div class="terminal-timeline" {
+                    @for ticket in tickets {
+                        (ticket)
+                    }
                 }
             }
         }
