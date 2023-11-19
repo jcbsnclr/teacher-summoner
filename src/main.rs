@@ -59,8 +59,18 @@ async fn root() -> maud::Markup {
     ui::base(
         "Welcome!",
         maud::html! {
-            p { "Welcome to " i { "Teacher Summoner" } ", a simple web app to request help from the teacher!"}
-            p { "Please either " a href="/create-class" { "create a class " } "or " a href="/join-class" { "join a class " } "to get started!" }
+            p {
+                "Welcome to "
+                i { "Teacher Summoner" }
+                ", a simple web app to request help from the teacher."
+            }
+            p {
+                "Please either "
+                a href="/create-class" { "create a class " }
+                "or "
+                a href="/join-class" { "join a class " }
+                "to get started!"
+            }
         },
     )
 }
