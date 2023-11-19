@@ -29,6 +29,9 @@ use tower_livereload::LiveReloadLayer;
 struct Cmdline {
     #[arg(short, long, help = "the port to serve the application on")]
     port: u16,
+
+    #[arg(short, long, help = "auto-reload clients when server restarts")]
+    reload: bool,
 }
 
 #[tokio::main]
@@ -52,10 +55,15 @@ async fn main() -> anyhow::Result<()> {
         // static data (js and stylesheets)
         .nest_service("/static", ServeDir::new("static"))
         // state containing classes and their lists of tickets
-        .with_state(state::AppState::init())
-        // middleware to insert JS to auto-reload page on request
-        // from server
-        .layer(LiveReloadLayer::new());
+        .with_state(state::AppState::init());
+
+    // middleware to insert JS to auto-reload page on request
+    // from server
+    let app = if args.reload {
+        app.layer(LiveReloadLayer::new())
+    } else {
+        app
+    };
 
     let addr = SocketAddr::from(([127, 0, 0, 1], args.port));
     axum::Server::bind(&addr)
