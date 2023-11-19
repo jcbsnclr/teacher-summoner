@@ -5,14 +5,18 @@ use maud::Render;
 use std::collections::HashSet;
 use std::fmt;
 
+use crate::state::ClassCode;
+
 pub struct TicketList {
+    class: ClassCode,
     tickets: Vec<Ticket>,
     dismissed: HashSet<TicketId>,
 }
 
 impl TicketList {
-    pub fn new() -> TicketList {
+    pub fn new(class: ClassCode) -> TicketList {
         TicketList {
+            class,
             tickets: vec![],
             dismissed: HashSet::new(),
         }
@@ -28,7 +32,12 @@ impl TicketList {
 
         let id = TicketId(self.tickets.len());
 
-        self.tickets.push(Ticket { id, student, desc });
+        self.tickets.push(Ticket {
+            class: self.class,
+            id,
+            student,
+            desc,
+        });
 
         id
     }
@@ -75,6 +84,8 @@ impl fmt::Display for TicketId {
 pub struct Ticket {
     /// ID of the ticket
     id: TicketId,
+    /// Class ID of ticket
+    class: ClassCode,
     /// Name of student opening a ticket
     student: String,
     /// A brief description of the query
@@ -83,6 +94,8 @@ pub struct Ticket {
 
 impl Render for Ticket {
     fn render(&self) -> maud::Markup {
+        let action = format!("update_list({})", self.id.0);
+
         maud::html! {
             div class="help-card terminal-card" {
                 header { (&self.student) " [" (self.id)  "]" }
@@ -96,7 +109,7 @@ impl Render for Ticket {
                     }
                 }
 
-                button class="btn help-card-btn" { "[x]" }
+                button class="btn help-card-btn" onclick=(action) { "[x]" }
             }
         }
     }

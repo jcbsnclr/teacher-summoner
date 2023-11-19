@@ -1,6 +1,21 @@
 use maud::{Render, DOCTYPE};
 
-use crate::ticket::Ticket;
+pub fn sidebar<'a>(items: impl IntoIterator<Item = (&'a str, &'a str)>) -> maud::Markup {
+    maud::html! {
+        div class="sidebar" {
+            header class="terminal-logo" {
+                h1 class="terminal-prompt" { "Teacher Summoner" }
+            }
+            ul {
+                @for item in items {
+                    li {
+                        a href=(item.1) { (item.0) }
+                    }
+                }
+            }
+        }
+    }
+}
 
 pub fn base(title: &str, body: impl Render) -> maud::Markup {
     maud::html! {
@@ -8,26 +23,20 @@ pub fn base(title: &str, body: impl Render) -> maud::Markup {
 
         head {
             meta charset="utf-8" {}
-            title { (title) " - WIP" }
+            title { (title) " - Teacher Summoner" }
             link rel="stylesheet" href="/static/terminal.min.css" {}
             link rel="stylesheet" href="/static/style.css" {}
         }
 
         body class="terminal" {
             div class="flex-container" {
-                div class="sidebar" {
-                    header class="terminal-logo" {
-                        h1 class="terminal-prompt" { "Teacher Summoner" }
-                    }
-                    ul {
-                        li { "Create Class" }
-                        li { "Join Class" }
-                    }
-                }
+                (sidebar([
+                    ("Create Class", "/create-class"),
+                    ("Join Class", "/join-class")
+                ]))
 
                 div class="content" {
-                    h1 { "Teacher View" }
-
+                    h1 { (title) }
                     (body)
                 }
             }
