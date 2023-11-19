@@ -19,12 +19,23 @@ use std::net::SocketAddr;
 use axum::routing::{get, post};
 use axum::Router;
 
+use clap::Parser;
+
 use tower_http::services::ServeDir;
 use tower_livereload::LiveReloadLayer;
+
+#[derive(Parser)]
+#[command(author, version, about)]
+struct Cmdline {
+    #[arg(short, long, help = "the port to serve the application on")]
+    port: u16,
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
+
+    let args = Cmdline::parse();
 
     let app = Router::new()
         // index page for site
@@ -46,7 +57,7 @@ async fn main() -> anyhow::Result<()> {
         // from server
         .layer(LiveReloadLayer::new());
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 1234));
+    let addr = SocketAddr::from(([127, 0, 0, 1], args.port));
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await?;
