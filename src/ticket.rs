@@ -1,3 +1,5 @@
+//! This module defines the internal logic for a [`TicketList`]. No endpoints are defined in this module.
+
 use serde::{Deserialize, Serialize};
 
 use maud::Render;
@@ -5,43 +7,44 @@ use maud::Render;
 use std::collections::HashSet;
 use std::fmt;
 
-use crate::state::ClassCode;
-
+/// List of tickets, and IDs of tickets that have been dismissed
 pub struct TicketList {
-    class: ClassCode,
+    /// List of tickets
     tickets: Vec<Ticket>,
+    /// A `HashSet` of all the dismissed tickets, for efficient lookup
     dismissed: HashSet<TicketId>,
 }
 
 impl TicketList {
-    pub fn new(class: ClassCode) -> TicketList {
+    /// Create an empty list
+    pub fn new() -> TicketList {
         TicketList {
-            class,
             tickets: vec![],
             dismissed: HashSet::new(),
         }
     }
 
+    /// Create a new ticket from a student's name and optional description, and return it's ID
     pub fn add_ticket(
         &mut self,
         student: impl AsRef<str>,
         desc: Option<impl AsRef<str>>,
     ) -> TicketId {
+        // get `&str`/`Option<&str>` from student/desc
         let student = student.as_ref().to_string();
         let desc = desc.map(|d| d.as_ref().to_string());
 
+        // get the ticket's ID
         let id = TicketId(self.tickets.len());
 
-        self.tickets.push(Ticket {
-            class: self.class,
-            id,
-            student,
-            desc,
-        });
+        // push new ticket to list
+        self.tickets.push(Ticket { id, student, desc });
 
+        // return new ID
         id
     }
 
+    /// Dismiss a given ticket
     pub fn dismiss(&mut self, id: TicketId) {
         self.dismissed.insert(id);
     }
@@ -52,8 +55,10 @@ impl Render for TicketList {
         let tickets = self
             .tickets
             .iter()
+            // filter out tickets that have been dismissed
             .filter(|t| !self.dismissed.contains(&t.id));
 
+        // if the length of dismissed == length of ticket list, then all tickets have been dismissed
         let is_empty = self.tickets.len() == self.dismissed.len();
 
         maud::html! {
@@ -61,6 +66,7 @@ impl Render for TicketList {
                 i { "No tickets open" }
             } @ else {
                 div class="terminal-timeline" {
+                    // render all tickets
                     @for ticket in tickets {
                         (ticket)
                     }
@@ -84,8 +90,6 @@ impl fmt::Display for TicketId {
 pub struct Ticket {
     /// ID of the ticket
     id: TicketId,
-    /// Class ID of ticket
-    class: ClassCode,
     /// Name of student opening a ticket
     student: String,
     /// A brief description of the query
@@ -94,6 +98,7 @@ pub struct Ticket {
 
 impl Render for Ticket {
     fn render(&self) -> maud::Markup {
+        // action to be called when button clicked, dismisses ticket of given ID
         let action = format!("update_list({})", self.id.0);
 
         maud::html! {

@@ -1,10 +1,8 @@
 "use strict";
 
-// extract `class_id` from script tag
 let class_id = parseInt(document.currentScript.getAttribute("classid"));
 console.log("class id = " + class_id);
 
-// updates the list of tickets, optionally dismissing a given ticket
 function update_list(dismissed) {
   // url to retrieve
   let path = "/class/" + class_id + "/teacher?raw=true";
@@ -30,7 +28,7 @@ function update_list(dismissed) {
   xhttp.send();
 }
 
-// refresh list every 2.5 seconds
+// refresh list every 5 seconds
 function refresh() {
   update_list();
   setTimeout(() => { refresh() }, 2500);

@@ -1,3 +1,9 @@
+//! This module defines the endpoints for students accessing a class.
+//!
+//! This module is used to define the following endpoints:
+//!   * *GET*  `/class/{id}/ticket` ([`view`])
+//!   * *POST* `/class/{id}/ticket` ([`submit_ticket`])
+
 use axum::extract::{Form, Path, State};
 
 use serde::Deserialize;
@@ -5,13 +11,19 @@ use serde::Deserialize;
 use crate::state::AppState;
 use crate::ui;
 
+/// Data from ticket details form
 #[derive(Debug, Clone, Deserialize)]
 pub struct FormData {
+    /// The name of the student submitting the ticket
     pub student: String,
+    /// An (optional) brief description of the ticket
     pub desc: String,
 }
 
+/// The form presented to students to open a ticket. Will `POST` the result to [`submit_ticket`] for
+/// a given class.
 pub fn form(id: u16) -> maud::Markup {
+    // the endpoint to send the form data to
     let action = format!("/class/{id}/student");
 
     maud::html! {
@@ -37,12 +49,14 @@ pub fn form(id: u16) -> maud::Markup {
     }
 }
 
+/// Handler for any tickets submitted.
 pub async fn submit_ticket(
     State(state): State<AppState>,
     Path(class_id): Path<u16>,
     Form(FormData { student, desc }): Form<FormData>,
 ) -> maud::Markup {
     let Ok(code) = state.get_code(class_id) else {
+        // class doesn't exist, present an error and prompt them to join a class
         return ui::base(
             "Unknown Class",
             maud::html! {
@@ -53,13 +67,16 @@ pub async fn submit_ticket(
     };
 
     let desc = if desc.trim().is_empty() {
+        // whitespace-trimmed description is empty, produce desc of `None`
         None
     } else {
         Some(desc)
     };
 
+    // add a ticket to the classes' list
     let id = state.with_tickets_mut(code, |t| t.add_ticket(&student, desc.as_ref()));
 
+    // present user with message to indicate success
     ui::base(
         "Open Ticket",
         maud::html! {
@@ -71,6 +88,7 @@ pub async fn submit_ticket(
     )
 }
 
+/// Presents the ticket submission form to the user. Does no additional processing
 pub async fn view(Path(id): Path<u16>) -> maud::Markup {
     ui::base("Ask for Help", form(id))
 }
