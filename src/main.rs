@@ -85,10 +85,10 @@ async fn root() -> maud::Markup {
             }
             p {
                 "Please either "
-                a href="/create-class" { "create a class " }
-                "or "
-                a href="/join-class" { "join a class " }
-                "to get started!"
+                a href="/create-class" { "create a class" }
+                " or "
+                a href="/join-class" { "join a class" }
+                " to get started!"
             }
         },
     )

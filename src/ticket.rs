@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 
 use maud::Render;
 
+use chrono::{DateTime, Utc};
+
 use std::collections::HashSet;
 use std::fmt;
 
@@ -31,14 +33,22 @@ impl TicketList {
         desc: Option<impl AsRef<str>>,
     ) -> TicketId {
         // get `&str`/`Option<&str>` from student/desc
-        let student = student.as_ref().to_string();
+        let student = student.as_ref().trim().to_string();
         let desc = desc.map(|d| d.as_ref().to_string());
 
         // get the ticket's ID
         let id = TicketId(self.tickets.len());
 
+        // get current time
+        let timestamp = Utc::now();
+
         // push new ticket to list
-        self.tickets.push(Ticket { id, student, desc });
+        self.tickets.push(Ticket {
+            id,
+            student,
+            desc,
+            timestamp,
+        });
 
         // return new ID
         id
@@ -94,6 +104,15 @@ pub struct Ticket {
     student: String,
     /// A brief description of the query
     desc: Option<String>,
+    /// The timestamp the ticket was created at
+    timestamp: DateTime<Utc>,
+}
+
+fn print_elapsed(duration: &chrono::Duration) -> String {
+    let mins = duration.num_minutes();
+    let secs = duration.num_seconds() % 60;
+
+    format!("{mins}:{secs:02} ago")
 }
 
 impl Render for Ticket {
@@ -103,9 +122,14 @@ impl Render for Ticket {
 
         maud::html! {
             div class="help-card terminal-card" {
-                header { (&self.student) " [" (self.id)  "]" }
+                @let duration = Utc::now() - self.timestamp;
+
+                header { b { (&self.student) } ", " (print_elapsed(&duration)) " [" (self.id)  "]" }
 
                 p class="help-card-text" {
+                    b { "Created: " }
+                    (self.timestamp.format("%c"))
+
                     b { "Description: " }
                     @if let Some(desc) = &self.desc {
                         (desc)
