@@ -32,7 +32,7 @@ pub fn sidebar<'a>(items: impl IntoIterator<Item = (&'a str, &'a str)>) -> maud:
             // hard-coded project links
             h1 { "Project Links:" }
             ul {
-                (list_link("GitHub", "https://github.com/jcbsnclr/teacker-summoner"))
+                (list_link("GitHub", "https://github.com/jcbsnclr/teacher-summoner"))
                 (list_link("License", "https://www.gnu.org/licenses/agpl-3.0.en.html"))
                 li {
                     "Made using "
