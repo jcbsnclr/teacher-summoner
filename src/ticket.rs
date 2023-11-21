@@ -128,7 +128,7 @@ impl Render for Ticket {
 
                 p class="help-card-text" {
                     b { "Created: " }
-                    (self.timestamp.format("%c"))
+                    i { (self.timestamp.format("%c")) }
 
                     b { "Description: " }
                     @if let Some(desc) = &self.desc {
