@@ -7,6 +7,7 @@ pkgs.mkShell {
     rustfmt
     rust-analyzer
     clippy
+    tokei
   ];
 
   RUST_BACKTRACE = 1;
