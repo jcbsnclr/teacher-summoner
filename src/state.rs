@@ -9,6 +9,8 @@ use std::sync::{Arc, RwLock};
 
 use serde::{Deserialize, Serialize};
 
+use web_push_native::jwt_simple::algorithms::ES256KeyPair;
+
 use crate::ticket::TicketList;
 
 /// Error type when an invalid class code is given.
@@ -40,6 +42,9 @@ pub struct AppState {
     /// The map of [`ClassCode`] to [`TicketList`], stored in a `RwLock` to support multiple readers, but
     /// only one writer, at any given time.
     classes: Arc<RwLock<HashMap<ClassCode, TicketList>>>,
+
+    /// VAPID signature, used for sending push notifications to client
+    vapid: Arc<ES256KeyPair>,
 }
 
 impl AppState {
@@ -47,7 +52,14 @@ impl AppState {
     pub fn init() -> AppState {
         AppState {
             classes: Arc::new(RwLock::new(HashMap::new())),
+            // generate a new VAPID keypair for the server
+            vapid: Arc::new(ES256KeyPair::generate()),
         }
+    }
+
+    /// Returns a reference to the VAPID key
+    pub fn vapid(&self) -> &ES256KeyPair {
+        &self.vapid
     }
 
     /// Randomly generates class codes, returns the first one that is not yet in use

@@ -16,11 +16,19 @@ mod ui;
 
 use std::net::SocketAddr;
 
+use axum::extract::State;
 use axum::routing::{get, post};
 use axum::Router;
 
 use clap::Parser;
 
+use base64ct::{Base64UrlUnpadded, Encoding};
+
+use web_push_native::jwt_simple::algorithms::ECDSAP256KeyPairLike;
+
+use serde::Serialize;
+
+use state::AppState;
 use tower_http::services::ServeDir;
 use tower_livereload::LiveReloadLayer;
 
@@ -43,6 +51,8 @@ async fn main() -> anyhow::Result<()> {
     let app = Router::new()
         // index page for site
         .route("/", get(root))
+        // for browsers to get VAPID public key
+        .route("/api/vapid.json", get(vapid))
         // handlers for creating/joining classes
         .route("/create-class", get(class::create))
         .route("/join-class", get(class::join_form))
@@ -71,6 +81,24 @@ async fn main() -> anyhow::Result<()> {
         .await?;
 
     Ok(())
+}
+
+#[derive(Debug, Serialize)]
+struct VapidKey {
+    vapid_key: String,
+}
+
+/// Returns a JSON object containing the server's VAPID public key
+async fn vapid(State(state): State<AppState>) -> axum::Json<VapidKey> {
+    axum::Json(VapidKey {
+        vapid_key: Base64UrlUnpadded::encode_string(
+            &state
+                .vapid()
+                .key_pair()
+                .public_key()
+                .to_bytes_uncompressed(),
+        ),
+    })
 }
 
 /// Index page (path `/`) for application

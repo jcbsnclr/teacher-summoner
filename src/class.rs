@@ -5,10 +5,12 @@
 //!   * *GET*  `/join-class`   ([`join_form`])
 //!   * *POST* `/join-class`   ([`join_submit`])
 
-use axum::extract::{Form, State};
+use axum::extract::{Form, Path, State};
 use axum::response::Redirect;
+use axum::Json;
 
 use serde::Deserialize;
+use web_push_native::WebPushBuilder;
 
 use crate::state::AppState;
 use crate::ui;
@@ -56,6 +58,20 @@ pub async fn join_form() -> maud::Markup {
 pub struct JoinData {
     /// 4-digit hexadecimal code for the class. Validation handled by HTML form
     code: String,
+}
+
+#[axum::debug_handler]
+pub async fn register(
+    State(state): State<AppState>,
+    Path(id): Path<u16>,
+    Json(builder): Json<WebPushBuilder>,
+) {
+    let Ok(code) = state.get_code(id) else {
+        log::error!("unknown class ID {id}");
+        return;
+    };
+
+    state.with_tickets_mut(code, |tickets| tickets.subscribe(builder.clone()));
 }
 
 /// Handler for the form submitted via [`join_form`]

@@ -35,3 +35,70 @@ function refresh() {
 }
 
 refresh();
+
+// code for subscribing for push notifications
+
+// kindly lifted from https://github.com/leotaku/web-push-native/blob/master/example/assets/index.js
+function url_base64_decode(base64String) {
+  var padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  var base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
+
+  var rawData = window.atob(base64);
+  var outputArray = new Uint8Array(rawData.length);
+
+  for (var i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+async function fetchVapidKeys() {
+  return fetch("/api/vapid.json").then((resp) => resp.json());
+}
+
+function register_sw() {
+    return navigator.serviceWorker
+        .register("/static/service-worker.js")
+        .then((registration) => {
+            console.log("service worker registered");
+            return registration;
+        })
+        .catch((err) => {
+            console.error("unable to register service worker", err);
+        });
+}
+
+function ask_permission() {
+    return new Promise((resolve, reject) => {
+        const result = Notification.requestPermission((result) => {
+            resolve(result);
+        });
+
+        if (result)
+            result.then(resolve, reject);
+    })
+    .then((result) => {
+        if (result != "granted") {
+            throw new Error("permission not granted");
+        }
+    });
+}
+
+function browser_supported() {
+    if (!('serviceWorker' in navigator)) {
+        console.log("service workers unsupported");
+        return false;
+    }
+    if (!('PushManager' in window)) {
+        console.log("push API unsupported");
+        return false;
+    }
+
+    return true;
+}
+
+async function subscribe() {
+    if (browser_supported()) {
+        await ask_permission();
+    }
+}

@@ -54,6 +54,8 @@ pub async fn ticket_list(
         ui::base(
             &format!("Open Tickets (Class {code})"),
             maud::html! {
+                btn class="btn btn-primary btn-ghost" onclick="subscribe()" { "Subscribe" }
+                hr {}
                 // creates div for the ticket list, will be dynamically filled via JS/AJAX
                 div id="ticket-list" {}
 
