@@ -59,6 +59,8 @@ async fn main() -> anyhow::Result<()> {
         .route("/join-class", post(class::join_submit))
         // handler for list of open tickets
         .route("/class/:id/teacher", get(teacher::ticket_list))
+        // subscribe for push notifications
+        // .route("/class/:id/subscribe", post(class::subscribe))
         // handlers for entering and submitting tickets
         .route("/class/:id/student", get(student::view))
         .route("/class/:id/student", post(student::submit_ticket))

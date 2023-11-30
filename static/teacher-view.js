@@ -39,7 +39,7 @@ refresh();
 // code for subscribing for push notifications
 
 // kindly lifted from https://github.com/leotaku/web-push-native/blob/master/example/assets/index.js
-function url_base64_decode(base64String) {
+function base64UrlDecode(base64String) {
   var padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   var base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
 
@@ -52,23 +52,24 @@ function url_base64_decode(base64String) {
   return outputArray;
 }
 
-async function fetchVapidKeys() {
+async function fetchVapidKey() {
   return fetch("/api/vapid.json").then((resp) => resp.json());
 }
 
-function register_sw() {
-    return navigator.serviceWorker
-        .register("/static/service-worker.js")
-        .then((registration) => {
-            console.log("service worker registered");
-            return registration;
-        })
-        .catch((err) => {
-            console.error("unable to register service worker", err);
-        });
+async function subToPush(keys) {
+    const registration = await navigator.serviceWorker.register("/static/service-worker.js");
+    registration.update();
+
+    const pushSub = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: keys.vapid_key
+    });
+    console.log("received subscription: ", pushSub);
+
+    return pushSub;
 }
 
-function ask_permission() {
+function requestPermission() {
     return new Promise((resolve, reject) => {
         const result = Notification.requestPermission((result) => {
             resolve(result);
@@ -84,7 +85,7 @@ function ask_permission() {
     });
 }
 
-function browser_supported() {
+function browserSupported() {
     if (!('serviceWorker' in navigator)) {
         console.log("service workers unsupported");
         return false;
@@ -98,7 +99,14 @@ function browser_supported() {
 }
 
 async function subscribe() {
-    if (browser_supported()) {
-        await ask_permission();
+    if (browserSupported()) {
+        await registerNotifications();
+
+        let keys = await fetchVapidKey();
+        await requestPermission();
     }
 }
+
+fetchVapidKey().then((key) => {
+    console.log(key.vapid_key);
+});

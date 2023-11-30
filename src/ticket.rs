@@ -4,26 +4,12 @@ use serde::{Deserialize, Serialize};
 
 use maud::Render;
 
-use hyper_rustls::HttpsConnectorBuilder;
-
 use chrono::{DateTime, Utc};
 
 use web_push_native::WebPushBuilder;
 
 use std::collections::HashSet;
 use std::fmt;
-
-async fn push(message: serde_json::Value, builder: &WebPushBuilder) -> anyhow::Result<()> {
-    let https = HttpsConnectorBuilder::new()
-        .with_native_roots()
-        .https_only()
-        .enable_http1()
-        .build();
-
-    // TODO: actually send off push notifications
-
-    unimplemented!()
-}
 
 /// List of tickets, and IDs of tickets that have been dismissed
 pub struct TicketList {
