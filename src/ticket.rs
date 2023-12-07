@@ -31,6 +31,10 @@ impl TicketList {
         }
     }
 
+    pub fn len(&self) -> usize {
+        self.tickets.len()
+    }
+
     /// Create a new ticket from a student's name and optional description, and return it's ID
     pub fn add_ticket(
         &mut self,
@@ -69,6 +73,10 @@ impl TicketList {
         if self.subscriber.is_none() {
             self.subscriber = Some(builder);
         }
+    }
+
+    pub fn subscriber(&self) -> Option<WebPushBuilder> {
+        self.subscriber.clone()
     }
 }
 

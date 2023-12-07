@@ -44,7 +44,9 @@ struct Cmdline {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .init();
 
     let args = Cmdline::parse();
 
@@ -60,7 +62,7 @@ async fn main() -> anyhow::Result<()> {
         // handler for list of open tickets
         .route("/class/:id/teacher", get(teacher::ticket_list))
         // subscribe for push notifications
-        // .route("/class/:id/subscribe", post(class::subscribe))
+        .route("/class/:id/register", post(class::register))
         // handlers for entering and submitting tickets
         .route("/class/:id/student", get(student::view))
         .route("/class/:id/student", post(student::submit_ticket))
@@ -87,7 +89,7 @@ async fn main() -> anyhow::Result<()> {
 
 #[derive(Debug, Serialize)]
 struct VapidKey {
-    vapid_key: String,
+    vapid_key: String, 
 }
 
 /// Returns a JSON object containing the server's VAPID public key

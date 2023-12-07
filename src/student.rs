@@ -54,16 +54,16 @@ pub async fn submit_ticket(
     State(state): State<AppState>,
     Path(class_id): Path<u16>,
     Form(FormData { student, desc }): Form<FormData>,
-) -> maud::Markup {
+) -> anyhow::Result<maud::Markup> {
     let Ok(code) = state.get_code(class_id) else {
         // class doesn't exist, present an error and prompt them to join a class
-        return ui::base(
+        return Ok(ui::base(
             "Unknown Class",
             maud::html! {
                 p { "Unknown class ID " (class_id) "." }
                 a href="/join-class" { "Go back." };
             },
-        );
+        ));
     };
 
     let desc = if desc.trim().is_empty() {
@@ -74,10 +74,26 @@ pub async fn submit_ticket(
     };
 
     // add a ticket to the classes' list
-    let id = state.with_tickets_mut(code, |t| t.add_ticket(&student, desc.as_ref()));
+    let (sub, id) = state.with_tickets_mut(code, |t| {
+        (t.subscriber(), t.add_ticket(&student, desc.as_ref()))
+    });
+
+    if let Some(sub) = sub {
+        let vapid = state.vapid();
+        let msg = sub
+            .with_vapid(&vapid, "mailto:jcbsnclr@outlook.com")
+            .build("new ticket")?
+            .map(|body| body.into());            
+
+        let client = reqwest::Client::new();
+
+        let req = reqwest::RequestBuilder::
+
+        client.execute(msg);
+    }
 
     // present user with message to indicate success
-    ui::base(
+    Ok(ui::base(
         "Open Ticket",
         maud::html! {
             div class="terminal-alert terminal-alert-primary" {
@@ -85,7 +101,7 @@ pub async fn submit_ticket(
             }
             (form(class_id))
         },
-    )
+    ))
 }
 
 /// Presents the ticket submission form to the user. Does no additional processing

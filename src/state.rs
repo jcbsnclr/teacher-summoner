@@ -7,9 +7,10 @@ use std::collections::HashMap;
 use std::fmt;
 use std::sync::{Arc, RwLock};
 
+use base64ct::{Base64UrlUnpadded, Encoding};
 use serde::{Deserialize, Serialize};
 
-use web_push_native::jwt_simple::algorithms::ES256KeyPair;
+use web_push_native::jwt_simple::algorithms::{ES256KeyPair, ECDSAP256KeyPairLike};
 
 use crate::ticket::TicketList;
 
@@ -45,6 +46,42 @@ pub struct AppState {
 
     /// VAPID signature, used for sending push notifications to client
     vapid: Arc<ES256KeyPair>,
+}
+
+struct ClassDebug(ClassCode, usize);
+
+impl fmt::Debug for ClassDebug {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let (code, len) = (self.0, self.1);
+        write!(f, "{code}: {len} tickets")
+    }
+}
+
+impl fmt::Debug for AppState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let classes = self.classes.read().unwrap();
+
+        let vapid_pub = Base64UrlUnpadded::encode_string(
+            &self
+                .vapid()
+                .key_pair()
+                .public_key()
+                .to_bytes_uncompressed(),
+        );
+
+        let mut class_set = f.debug_set();
+
+        for (key, list) in classes.iter() {
+            class_set.entry(&ClassDebug(*key, list.len()));
+        }
+
+        let class_set = class_set.finish()?;
+
+        f.debug_struct("AppState")
+            .field("vapid_pub", &vapid_pub)
+            .field("classes", &class_set)
+            .finish()
+    }
 }
 
 impl AppState {

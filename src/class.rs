@@ -60,14 +60,17 @@ pub struct JoinData {
     code: String,
 }
 
+#[tracing::instrument]
 #[axum::debug_handler]
 pub async fn register(
     State(state): State<AppState>,
     Path(id): Path<u16>,
     Json(builder): Json<WebPushBuilder>,
 ) {
+    let sub = serde_json::to_string(&builder).unwrap();
+    tracing::debug!(id, sub, "user registered for class");
     let Ok(code) = state.get_code(id) else {
-        log::error!("unknown class ID {id}");
+        tracing::error!(id, "unknown class");
         return;
     };
 

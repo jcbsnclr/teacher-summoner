@@ -58,7 +58,10 @@ async function fetchVapidKey() {
 
 async function subToPush(keys) {
     const registration = await navigator.serviceWorker.register("/static/service-worker.js");
-    registration.update();
+    await registration.update();
+
+    await registration.pushManager.getSubscription()
+        .then((sub) => sub.unsubscribe());
 
     const pushSub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -100,10 +103,20 @@ function browserSupported() {
 
 async function subscribe() {
     if (browserSupported()) {
-        await registerNotifications();
+        // await registerNotifications();
 
         let keys = await fetchVapidKey();
         await requestPermission();
+
+        let sub = await subToPush(keys);
+
+        await fetch(`/class/${class_id}/register`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(sub)
+        });
     }
 }
 
