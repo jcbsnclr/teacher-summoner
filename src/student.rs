@@ -50,20 +50,21 @@ pub fn form(id: u16) -> maud::Markup {
 }
 
 /// Handler for any tickets submitted.
+#[axum::debug_handler]
 pub async fn submit_ticket(
     State(state): State<AppState>,
     Path(class_id): Path<u16>,
     Form(FormData { student, desc }): Form<FormData>,
-) -> anyhow::Result<maud::Markup> {
+) -> maud::Markup {
     let Ok(code) = state.get_code(class_id) else {
         // class doesn't exist, present an error and prompt them to join a class
-        return Ok(ui::base(
+        return ui::base(
             "Unknown Class",
             maud::html! {
                 p { "Unknown class ID " (class_id) "." }
                 a href="/join-class" { "Go back." };
             },
-        ));
+        );
     };
 
     let desc = if desc.trim().is_empty() {
@@ -78,22 +79,22 @@ pub async fn submit_ticket(
         (t.subscriber(), t.add_ticket(&student, desc.as_ref()))
     });
 
-    if let Some(sub) = sub {
-        let vapid = state.vapid();
-        let msg = sub
-            .with_vapid(&vapid, "mailto:jcbsnclr@outlook.com")
-            .build("new ticket")?
-            .map(|body| body.into());            
+    // if let Some(sub) = sub {
+    //     let vapid = state.vapid();
+    //     let msg = sub
+    //         .with_vapid(&vapid, "mailto:jcbsnclr@outlook.com")
+    //         .build("new ticket")?
+    //         .map(|body| body.into());
 
-        let client = reqwest::Client::new();
+    //     let client = reqwest::Client::new();
 
-        let req = reqwest::RequestBuilder::
+    //     // let req = reqwest::RequestBuilder::
 
-        client.execute(msg);
-    }
+    //     client.execute(msg);
+    // }
 
     // present user with message to indicate success
-    Ok(ui::base(
+    ui::base(
         "Open Ticket",
         maud::html! {
             div class="terminal-alert terminal-alert-primary" {
@@ -101,7 +102,7 @@ pub async fn submit_ticket(
             }
             (form(class_id))
         },
-    ))
+    )
 }
 
 /// Presents the ticket submission form to the user. Does no additional processing
